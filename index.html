@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Alma Música</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* 🎨 Paleta pastel (latina, cálida y suave) */
+    --bg:#fffaf5;
+    --grid:#f6eee7;
+    --ink:#3a3432;
+    --muted:#7b6d68;
+
+    --deck:#ffe6ec;    /* cuerpo rosado */
+    --deck-2:#ffd7b8;  /* degradé durazno */
+    --plinth:#eef9f5;  /* base menta muy suave */
+    --platter:#e8f0ff; /* plato celeste claro */
+
+    --accent:#ff9dac;  /* acento salmón pastel */
+    --mint:#89e3cf;    /* led/ok menta */
+    --rose:#ffd4e2;    /* botón primario */
+    --lemon:#fff2b8;   /* botón secundario */
+
+    --shadow:0 12px 34px rgba(60,40,40,.12);
+    --radius:18px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      linear-gradient(0deg, transparent 24%, var(--grid) 25%, var(--grid) 26%, transparent 27%),
+      linear-gradient(90deg, transparent 24%, var(--grid) 25%, var(--grid) 26%, transparent 27%),
+      var(--bg);
+    background-size:36px 36px;
+  }
+
+  header{
+    position:sticky; top:0; z-index:20; backdrop-filter: blur(8px);
+    background:color-mix(in oklab, #fff 65%, var(--deck) 35%);
+    border-bottom:1px solid #eddcd2;
+  }
+  .nav{
+    max-width:1100px; padding:14px 4%; margin:auto;
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+  }
+  .brand{font-weight:800; letter-spacing:.2px}
+  .brand small{font-weight:600; color:var(--muted)}
+
+  .container{max-width:1100px; margin:20px auto 60px; padding:0 4%}
+
+  /* ---- Tocadiscos ---- */
+  .deck{
+    width:min(920px,100%); margin:18px auto;
+    background:linear-gradient(180deg,var(--deck),var(--deck-2));
+    border:2px solid color-mix(in oklab,var(--deck-2) 70%, #000 8%);
+    border-radius:var(--radius); box-shadow:var(--shadow);
+    padding:18px; position:relative;
+  }
+  .base{
+    background:var(--plinth); border:2px solid #dfeee7;
+    border-radius:14px; padding:20px;
+    display:grid; grid-template-columns: 1.2fr .8fr; gap:20px;
+  }
+  @media (max-width:900px){ .base{grid-template-columns:1fr} }
+
+  .platter{
+    aspect-ratio:1; width:min(520px,100%); margin:auto; border-radius:50%;
+    background:
+      radial-gradient(circle at 50% 50%, #dbe6ff 0 42%, #cfdbf3 42% 44%, #e7efff 44%);
+    border:10px solid var(--platter);
+    box-shadow:inset 0 10px 20px rgba(0,0,0,.05);
+    position:relative; display:grid; place-items:center;
+  }
+  .record{
+    --rev:1.8s; /* 33⅓ rpm */
+    position:relative;
+    width:88%; aspect-ratio:1; border-radius:50%;
+    background:radial-gradient(circle at 50% 50%, #26272f 0 72%, #14151c 72% 100%);
+    box-shadow:inset 0 0 0 10px #1a1b22, inset 0 0 0 40px #0e0f15;
+    animation:spin var(--rev) linear infinite;
+    animation-play-state:paused; /* corre cuando hay play */
+  }
+  .record::after{ /* etiqueta (portada del vinilo si hay) */
+    content:""; position:absolute; inset:0; margin:auto;
+    width:34%; aspect-ratio:1; border-radius:50%;
+    background:var(--label, radial-gradient(circle at 35% 35%, #fff0c9, #ffd2dd));
+    box-shadow:0 8px 14px rgba(0,0,0,.12), inset 0 0 0 6px rgba(255,255,255,.65);
+  }
+  @keyframes spin{to{ transform:rotate(360deg) }}
+
+  .arm{
+    position:absolute; right:18px; top:24px; width:220px; height:22px;
+    transform-origin: 200px 10px; transform: rotate(-28deg);
+    transition: transform .8s cubic-bezier(.2,.7,.1,1);
+    pointer-events:none;
+  }
+  .arm .rod{
+    position:absolute; left:0; top:0; width:200px; height:6px; border-radius:6px;
+    background:linear-gradient(180deg,#f9d9e8,#e5c3df);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.6);
+  }
+  .arm .head{
+    position:absolute; right:-6px; top:-2px; width:24px; height:18px; border-radius:8px;
+    background:linear-gradient(180deg,#2c2e38,#1b1d25); border:2px solid #11131a;
+  }
+  .arm .pivot{
+    position:absolute; left:186px; top:-8px; width:22px; height:22px;
+    border-radius:50%; background:#ffe5f1; border:2px solid #f2cbdc;
+  }
+  .arm.playing{ transform: rotate(-10deg) }
+
+  .controls{display:grid; grid-template-columns: 1fr; gap:14px}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+
+  .btn{
+    appearance:none; border:0; cursor:pointer;
+    background:var(--rose); color:#5b3f43;
+    padding:10px 14px; border-radius:999px; font-weight:700; box-shadow:var(--shadow);
+  }
+  .btn.secondary{ background:var(--lemon); color:#6a5a2a }
+  .btn.ghost{ background:transparent; outline:2px dashed #f1c7cf; color:var(--ink) }
+
+  .switch{
+    position:relative; width:56px; height:30px; background:#f4e9ff;
+    border-radius:999px; border:2px solid #e9d7ff; cursor:pointer;
+  }
+  .switch i{
+    position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%;
+    background:var(--mint); transition:left .2s ease;
+    box-shadow:0 2px 0 rgba(255,255,255,.7) inset, var(--shadow);
+  }
+  .switch[data-on="true"] i{ left:30px }
+  .lamp{width:10px; height:10px; background:#d2c9e8; border-radius:50%; box-shadow:0 0 0 2px #f0e6ff inset}
+  .lamp.on{ background:var(--mint); box-shadow:0 0 8px var(--mint) }
+
+  .speed{
+    display:flex; gap:8px; align-items:center;
+    background:#fff4f7; border:2px solid #ffdbe8; padding:6px 10px; border-radius:10px;
+  }
+  .speed input{ accent-color: var(--accent) }
+
+  .progress{
+    width:100%; height:10px; border-radius:999px; background:#ffeef3;
+    position:relative; overflow:hidden; border:2px solid #ffdbe8; cursor:pointer;
+  }
+  .bar{position:absolute; left:0; top:0; bottom:0; width:0%; background:linear-gradient(90deg,var(--accent),#87dec9)}
+  .timers{display:flex; justify-content:space-between; color:var(--muted); font-size:12px}
+
+  /* ---- Biblioteca ---- */
+  .section-title{margin:20px 0 10px; font-weight:700}
+  .grid{display:grid; gap:14px; grid-template-columns: repeat(auto-fill,minmax(180px,1fr))}
+  .card{
+    background:#fff; border:1px solid #f0dfe1; border-radius:14px; padding:10px; box-shadow:var(--shadow);
+    display:grid; gap:8px; cursor:pointer;
+  }
+  .thumb{ aspect-ratio:1; border-radius:10px; background:#fff6f9 center/cover no-repeat; border:1px solid #f6e9ed }
+  .meta{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .title{ font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+
+  /* Foco accesible */
+  :focus-visible{ outline:3px solid color-mix(in oklab, var(--accent) 65%, #fff 35%); outline-offset:3px }
+</style>
+</head>
+<body>
+<header>
+  <nav class="nav">
+    <div class="brand">Alma Música <small>Versión en Español</small></div>
+    <div class="row">
+      <div class="lamp" id="lamp"></div>
+      <div class="switch" id="power" role="switch" aria-checked="false" aria-label="Power"><i></i></div>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <!-- Tocadiscos -->
+  <section class="deck" aria-label="Tocadiscos">
+    <div class="base">
+      <!-- Plato -->
+      <div style="position:relative;display:grid;place-items:center">
+        <div class="platter">
+          <!-- 🚫 Sin spindle (centro limpio) -->
+          <div class="record" id="record"></div>
+          <div class="arm" id="arm"><span class="rod"></span><span class="pivot"></span><span class="head"></span></div>
+        </div>
+      </div>
+
+      <!-- Controles -->
+      <div class="controls">
+        <div class="row">
+          <button class="btn" id="play">▶︎/⏸</button>
+          <button class="btn secondary" id="stop">⏹</button>
+          <button class="btn ghost" id="prev">⏮</button>
+          <button class="btn ghost" id="next">⏭</button>
+        </div>
+
+        <div class="speed" role="group" aria-label="Velocidad">
+          <strong>RPM</strong>
+          <label><input type="radio" name="rpm" value="33" checked> 33</label>
+          <label><input type="radio" name="rpm" value="45"> 45</label>
+        </div>
+
+        <div class="row" style="align-items:center">
+          <input id="volume" type="range" min="0" max="100" value="75" style="flex:1" aria-label="Volumen">
+          <span style="width:46px;text-align:right" id="volText">75%</span>
+        </div>
+
+        <div class="progress" id="progress" aria-label="Progreso"><div class="bar" id="bar"></div></div>
+        <div class="timers"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+
+        <div style="font-size:14px;color:var(--muted)">
+          <div id="nowTitle" class="title">Sin vinilo</div>
+          <div id="nowArtist" class="meta"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Biblioteca -->
+  <h3 class="section-title">Vinilos</h3>
+  <section class="grid" id="grid"></section>
+</main>
+
+<audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
+
+<script>
+
+const LIBRARY = [
+  { title: "No Te Apartes de Mí",        artist: "Vicentico",     cover: "No Te Apartes de Mí.jpeg",        audio: "No Te Apartes de Mí.mp3" },
+  { title: "Así Te Pedí",            artist: "Zeri",cover: "Así Te Pedí.jpeg",            audio: "Así Te Pedí.mp3" },
+  { title: "Pero Te Conocí",          artist: "Reik",    cover: "Pero Te Conocí.jpeg",          audio: "Pero Te Conocí.mp3" },
+  { title: "Bailemos",  artist: "BERH",          cover: "Bailemos.jpeg",  audio: "Bailemos.mp3" },
+  { title: "Mi Alma Gemela",         artist: "Tercer Cielo",    cover: "Mi Alma Gemela.jpg",         audio: "Mi Alma Gemela.mp3" },
+  { title: "Puesto",          artist: "Babasónicos",            cover: "Puesto.jpeg",          audio: "Puesto.mp3" },
+  { title: "Rubí",              artist: "Babasónicos",          cover: "Rubí.jpeg",              audio: "Rubí.mp3" },
+  { title: "Tus Ojos",                    artist: "Beruti",     cover: "Tus Ojos.jpeg",                    audio: "Tus Ojos.mp3" },
+  { title: "Amo",       artist: "Axel",      cover: "Amo.webp",       audio: "Amo.mp3" },
+  { title: "Volví a Nacer",         artist: "Carlos Vives",          cover: "Volví a Nacer.jpg",         audio: "Volví a Nacer.mp3" }
+];
+/* ========================================================= */
+
+/* ====== Estado ====== */
+const state = { on:false, rpm:33, volume:0.75, playing:false, list:[], current:-1 };
+
+/* ====== Helpers ====== */
+const $ = (s,ctx=document)=>ctx.querySelector(s);
+const $$ = (s,ctx=document)=>[...ctx.querySelectorAll(s)];
+const fmt = (t)=>{ if(!t||!isFinite(t)) return '0:00'; const m=Math.floor(t/60), s=Math.floor(t%60).toString().padStart(2,'0'); return `${m}:${s}`; };
+
+/* ====== Elementos ====== */
+const power=$('#power'), lamp=$('#lamp'), record=$('#record'), arm=$('#arm'), audio=$('#audio');
+const playBtn=$('#play'), stopBtn=$('#stop'), prevBtn=$('#prev'), nextBtn=$('#next');
+const rpmRadios=$$('input[name="rpm"]');
+const vol=$('#volume'), volText=$('#volText');
+const progress=$('#progress'), bar=$('#bar');
+const tCur=$('#tCur'), tDur=$('#tDur');
+const nowTitle=$('#nowTitle'), nowArtist=$('#nowArtist');
+const grid=$('#grid');
+
+/* ====== Power ====== */
+power.addEventListener('click', ()=>togglePower(!state.on));
+power.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); togglePower(!state.on);} });
+function togglePower(on){
+  state.on=on;
+  power.dataset.on=on?'true':'false';
+  power.setAttribute('aria-checked', String(on));
+  lamp.classList.toggle('on', on);
+  if(!on) stopAll();
+}
+
+/* ====== Cargar biblioteca ====== */
+function loadLibrary(){
+  state.list = LIBRARY.map((v,i)=>({id:i+1, ...v, duration:0}));
+  renderLibrary();
+  // Precargar duraciones si el navegador lo permite
+  state.list.forEach((v)=>getDuration(v.audio).then(d=>{
+    v.duration=d;
+    if(state.current===-1){ selectVinyl(0,false); }
+  }).catch(()=>{}));
+}
+function renderLibrary(){
+  grid.innerHTML='';
+  state.list.forEach((v,i)=>{
+    const card=document.createElement('article');
+    card.className='card'; card.tabIndex=0; card.setAttribute('role','button');
+
+    const th=document.createElement('div'); th.className='thumb';
+    if(v.cover) th.style.backgroundImage=`url("${v.cover}")`;
+
+    const ti=document.createElement('div'); ti.className='title'; ti.textContent=v.title;
+    const me=document.createElement('div'); me.className='meta'; me.textContent=`${v.artist||'—'}`;
+
+    card.append(th,ti,me);
+    card.addEventListener('click',()=>selectVinyl(i,true));
+    card.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectVinyl(i,true); }});
+
+    grid.appendChild(card);
+  });
+}
+
+/* ====== Selección y reproducción ====== */
+function selectVinyl(index, autoPlay){
+  if(index<0||index>=state.list.length) return;
+  state.current=index; const v=state.list[index];
+
+  // etiqueta del vinilo con la portada
+  record.style.setProperty('--label', v.cover ? `url("${v.cover}") center/cover no-repeat` : '');
+
+  // audio y velocidad
+  audio.src=v.audio;
+  audio.playbackRate = state.rpm===45 ? (45/33.333) : 1;
+
+  // UI
+  nowTitle.textContent=v.title;
+  nowArtist.textContent=v.artist||'';
+  tCur.textContent='0:00';
+  tDur.textContent=v.duration?fmt(v.duration):'0:00';
+
+  if(state.on && autoPlay) play();
+}
+
+playBtn.addEventListener('click', ()=>state.playing?pause():play());
+stopBtn.addEventListener('click', stopAll);
+prevBtn.addEventListener('click', ()=>selectVinyl(prevIndex(), true));
+nextBtn.addEventListener('click', ()=>selectVinyl(nextIndex(), true));
+
+function prevIndex(){ return (state.current<=0 ? state.list.length-1 : state.current-1); }
+function nextIndex(){ return (state.current+1) % state.list.length; }
+
+function play(){
+  if(!state.on){ togglePower(true); }
+  if(state.current===-1 && state.list.length) selectVinyl(0,false);
+  if(!audio.src) return;
+  audio.play().then(()=>{
+    state.playing=true;
+    record.style.animationPlayState='running';
+    arm.classList.add('playing');
+  }).catch(()=>{ /* autoplay bloqueado (móvil) */ });
+}
+function pause(){
+  state.playing=false;
+  audio.pause();
+  record.style.animationPlayState='paused';
+  arm.classList.remove('playing');
+}
+function stopAll(){
+  pause();
+  audio.currentTime=0;
+  updateProgress(0,audio.duration||0);
+}
+
+/* ====== RPM ====== */
+rpmRadios.forEach(r=>r.addEventListener('change', ()=>{
+  state.rpm = Number(document.querySelector('input[name="rpm"]:checked').value);
+  record.style.setProperty('--rev', state.rpm===45 ? '1.333s' : '1.8s');
+  audio.playbackRate = state.rpm===45 ? (45/33.333) : 1;
+}));
+
+/* ====== Volumen ====== */
+vol.addEventListener('input', ()=>{
+  state.volume=vol.valueAsNumber/100;
+  audio.volume=state.volume;
+  volText.textContent=Math.round(state.volume*100)+'%';
+});
+audio.volume=state.volume;
+
+/* ====== Progreso ====== */
+audio.addEventListener('timeupdate', ()=>{
+  updateProgress(audio.currentTime, audio.duration);
+  // brazo acompaña el recorrido
+  const start=-28, end=-6;
+  const p=Math.min(1,(audio.currentTime||0)/Math.max(1,audio.duration||1));
+  arm.style.transform=`rotate(${start+(end-start)*p}deg)`;
+});
+audio.addEventListener('loadedmetadata', ()=> tDur.textContent=fmt(audio.duration));
+audio.addEventListener('ended', ()=> nextBtn.click());
+
+progress.addEventListener('click', (e)=>{
+  if(!audio.duration) return;
+  const r=progress.getBoundingClientRect();
+  const p=(e.clientX-r.left)/r.width;
+  audio.currentTime=audio.duration*p;
+});
+function updateProgress(cur,dur){
+  const p=dur?(cur/dur)*100:0;
+  bar.style.width=`${p}%`;
+  tCur.textContent=fmt(cur);
+  tDur.textContent=fmt(dur);
+}
+
+/* ====== Util ====== */
+function getDuration(url){
+  return new Promise((res,rej)=>{
+    const a=new Audio(); a.preload='metadata'; a.src=url;
+    a.addEventListener('loadedmetadata',()=>res(a.duration));
+    a.addEventListener('error',rej);
+  });
+}
+
+/* ====== Atajos ====== */
+document.addEventListener('keydown', (e)=>{
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+  if(e.key===' '){ e.preventDefault(); playBtn.click(); }
+  if(e.key==='ArrowRight') nextBtn.click();
+  if(e.key==='ArrowLeft') prevBtn.click();
+  if(e.key==='ArrowUp'){ vol.value=Math.min(100,vol.valueAsNumber+5); vol.dispatchEvent(new Event('input')); }
+  if(e.key==='ArrowDown'){ vol.value=Math.max(0,vol.valueAsNumber-5); vol.dispatchEvent(new Event('input')); }
+});
+
+/* ====== Init ====== */
+togglePower(false);
+record.style.setProperty('--rev','1.8s');
+loadLibrary();
+</script>
+</body>
+</html>
